@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>city</title>
+    <style type="text/css">
+        html, body {
+            margin: 0;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+</body>
+<script src="build/three.js"></script>
+<script src="build/three.min.js"></script>
+<script src="examples/js/lights/RectAreaLightUniformsLib.js"></script>
+<script src="examples/js/controls/OrbitControls.js"></script>
+<script src="examples/js/libs/stats.min.js"></script>
+<script src="examples/js/libs/dat.gui.min.js"></script>
+<script src="examples/js/loaders/GLTFLoader.js"></script>
+<script src="examples/js/utils/ImageUtils.js"></script>
+<script src="examples/js/Detector.js"></script>
+
+<script>
+    var renderer, camera, scene, gui, light, stats, controls, sphereMesh, sphereMaterial;
+
+    function initRender() {
+        renderer = new THREE.WebGLRenderer({antialias: true});
+        renderer.setPixelRatio(window.devicePixelRatio);
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0xeeeeee);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+    }
+
+    function initCamera() {
+        camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 12, 15 );
+    }
+
+    function initScene() {
+        var cubeTextureLoader = new THREE.CubeTextureLoader();
+        cubeTextureLoader.setCrossOrigin('anonymous');
+        cubeTextureLoader.setPath( './examples/textures/cube/NissiBeach2/' );
+        var cubeTexture = cubeTextureLoader.load( [
+            'posx.jpg', 'negx.jpg',
+            'posy.jpg', 'negy.jpg',
+            'posz.jpg', 'negz.jpg'+ "?v=" + (new Date()).toString(), function() {animate();}
+        ] );
+
+        scene = new THREE.Scene();
+
+        scene.background = cubeTexture;
+    }
+
+    function initLight() {
+        scene.add(new THREE.AmbientLight(0xffffff));
+
+        light = new THREE.DirectionalLight(0xffffff);
+        light.position.set(0, 20, -20 );
+
+        light.castShadow = true;
+        light.shadow.camera.top = 10;
+        light.shadow.camera.bottom = -10;
+        light.shadow.camera.left = -10;
+        light.shadow.camera.right = 10;
+
+        light.castShadow = true;
+
+    }
+
+    function initModel() {
+
+        var geometry = new THREE.SphereBufferGeometry( 5, 100, 50 );
+
+        sphereMaterial = new THREE.MeshLambertMaterial( { envMap: scene.background } );
+        sphereMesh = new THREE.Mesh( geometry, sphereMaterial );
+        scene.add( sphereMesh );
+    }
+
+    function test(){
+        alert("hi");
+    }
+    function initStats() {
+        stats = new Stats();
+    }
+
+    function initControls() {
+
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.enableZoom = true;
+        controls.autoRotate = false;
+        controls.autoRotateSpeed = 0.5;
+        controls.minDistance = 1;
+        controls.maxDistance = 2000;
+        controls.enablePan = true;
+    }
+
+    function render() {
+
+    }
+
+    function onWindowResize() {
+
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+    }
+
+    function animate() {
+        render();
+
+        stats.update();
+
+        controls.update();
+
+        renderer.render(scene, camera);
+
+        requestAnimationFrame(animate);
+    }
+    function initGui() {
+        var listener = new THREE.AudioListener();
+        var audio = new THREE.Audio(listener);
+        var audioLoader = new THREE.AudioLoader();
+        gui = {
+            back:function () {
+                window.location.href="./index.html";
+            }
+        };
+		gui2 = {
+            play:function () {
+                audioLoader.load('./mu/ocean.mp3', function(AudioBuffer) {
+                audio.setBuffer(AudioBuffer);
+                audio.setLoop(true); //是否循環
+                audio.setVolume(0.5); //音量
+                audio.play(); //play播放
+            });
+            }
+        };
+        gui3= {
+            stop:function () {
+                audio.stop(); //stop停止
+            }
+        };
+        var datGui = new dat.GUI();
+        datGui.add(gui, "back");
+        datGui.add(gui2, "play");
+        datGui.add(gui3, "stop");
+
+
+    }
+    function draw() {
+        if (!Detector.webgl) Detector.addGetWebGLMessage();
+        initGui();
+        initRender();
+        initScene();
+        initCamera();
+        initLight();
+        initModel();
+        initControls();
+        initStats();
+
+        animate();
+        window.onresize = onWindowResize;
+    }
+    window.addEventListener("load", draw, false);
+
+</script>
+</html>
