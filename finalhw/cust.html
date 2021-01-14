@@ -1,0 +1,396 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<title>sound</title>
+<meta charset="UTF-8">
+<style>
+#track1,#track2 {
+  float: left;
+  width: 450px;
+  height: 42px;
+  margin: 0px;
+  padding: 0px;
+  border: 1px solid black;
+  z-index: 1;
+}
+#bar{border: 5px solid red;
+      height: 90px;
+      width: 0px;
+      z-index: 2;
+      float: left;
+      margin: 0px;
+  padding: 0px;
+      position:absolute;
+}
+html, body {
+    width: 110%;
+    height: 100%;
+    overflow: hidden;
+    background-size: cover;
+    background-repeat:no-repeat;
+}
+.s1,.s2{
+    float: left;
+    position:absolute;
+}
+#wh{
+    background-color: rgba(255,255,255,0.5);
+    width: 460px;
+    height: 500px;
+    position:absolute;
+}
+</style>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js" type="text/javascript"></script>
+<script src="build/three.js"></script>
+<script src="build/three.min.js"></script>
+<script src="examples/js/lights/RectAreaLightUniformsLib.js"></script>
+<script src="examples/js/controls/OrbitControls.js"></script>
+<script src="examples/js/libs/stats.min.js"></script>
+<script src="examples/js/libs/dat.gui.min.js"></script>
+<script src="examples/js/loaders/GLTFLoader.js"></script>
+<script src="examples/js/utils/ImageUtils.js"></script>
+<script src="examples/js/Detector.js"></script>
+<script>
+  function initGui() {
+        gui = {
+          city:function () {
+              var background = document.getElementById("back");
+              background.setAttribute( "background","./image/city.jpg" );
+
+            }
+        };
+		  gui2 = {
+      mountain:function () {
+              var background = document.getElementById("back");
+              background.setAttribute( "background","./image/moun.jpg" );
+            }
+        };
+        gui3 = {
+      river:function () {
+              var background = document.getElementById("back");
+              background.setAttribute( "background","./image/river2.jpg" );
+            }
+        };
+        gui4 = {
+      ocean:function () {
+              var background = document.getElementById("back");
+              background.setAttribute( "background","./image/ocean2.jpg" );
+            }
+        };
+        gui5 = {
+            back:function () {
+                window.location.href="./index.html";
+            }
+        };
+        var datGui = new dat.GUI();
+    datGui.add(gui, "city");
+    datGui.add(gui2, "mountain");
+    datGui.add(gui3, "river");
+    datGui.add(gui4, "ocean");
+    datGui.add(gui5, "back");
+
+    }
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function drag(ev) {
+  ev.dataTransfer.setData("text", ev.target.id);
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  var data=ev.dataTransfer.getData("text");
+  var nodeCopy = document.getElementById(data).cloneNode(true);
+  console.log(nodeCopy.id);// = "newId"; 
+  ev.target.appendChild(nodeCopy);
+}
+function get_audio_lenth(){
+    //var rainsnd_len =document.getElementById("rain").duration;
+        //console.log(rainsnd_len);
+    //var firesnd_len =document.getElementById("fire").duration;
+        //console.log(firesnd_len);
+    //var windsnd_len =document.getElementById("wind").duration;
+        //console.log(windsnd_len);
+
+    //var self_len =document.getElementsByTagName('audio')[i].duration;
+        //console.log(self_len);
+        //return self_len*10;
+  var f_duration = 0; //存儲時間
+  document.getElementById("src").addEventListener('canplaythrough',function(e){
+ //在輸入字段#f_du中添加持續時間
+ f_duration = Math.round(e.currentTarget.duration);
+ //document.getElementById('f_du').value = f_duration;
+ console.log(f_duration);
+ //URL.revokeObjectURL(obUrl);
+});   
+}
+function check_audio_full(){
+  var full_num=0;
+  let items = document.querySelectorAll("#track1 > img")
+  items.forEach(item => {
+    full_num+=$(item).prop('width');
+    if(full_num>450){
+      $(item).remove();
+      window.alert("too much");
+    }
+  })
+  var full_num1=0;
+  let items1 = document.querySelectorAll("#track2 > img")
+  items1.forEach(item => {
+    full_num1+=$(item).prop('width');
+    if(full_num1>450){
+      $(item).remove();
+      window.alert("too much");
+    }
+  })
+  console.log(full_num);
+  console.log(full_num1);
+}
+
+
+$(document).ready(function(){
+                $("#clear").on("click",function(){
+                  
+                  $(".div1").empty();
+                  i=0;
+                  j=0;
+                 var sounds = document.getElementsByTagName('audio');
+                  for(var i=0; i<sounds.length; i++) {
+                    sounds[i].pause();
+                    sounds[i].currentTime = 0;
+                  }
+                  //location.reload();
+                })
+});
+
+$(document).ready(function(){
+                $("#play").on("click",function(){
+                  playaud2();
+              })
+
+});
+$(document).ready(function(){
+                $("#play").on("click",function(){
+                  playaud1(); 
+              })
+
+});
+
+var interval = null;
+var speed = 0.1;
+var count = 0;
+var stop=0; 
+$(document).ready(function(){
+                $("#play").on("click",function(){
+                  interval =window.setInterval( "run()", 10 );
+                  $("#clear").on("click",function(){
+                  stop=1;});
+              });
+
+});
+function run()
+{
+   count += speed;
+
+   var movebar = document.getElementById( "bar" );
+   movebar.setAttribute( "style", "left: " + ( count + "px;"));
+
+   if ( count >= 450 ||stop==1) 
+   {
+      window.clearInterval( interval );
+      interval = null;
+      movebar.setAttribute( "style", "left: 0px;");
+      stop=0;
+      count = 0;
+   }
+
+   
+}
+
+var i =0;
+function playaud1(){
+  var foo = document.getElementById('track1');         
+  if(i<foo.children.length){
+    if(foo.children[i].id=="drag1"){
+      rains.play();                  
+      rains.onended = function() {i++;console.log("r1");playaud1();};                
+    }else if(foo.children[i].id=="drag2"){
+      fires.play();                
+      fires.onended = function() {i++;console.log("f1");playaud1();};
+    }else if(foo.children[i].id=="drag3"){
+      winds.play();                
+      winds.onended = function() {i++;console.log("w1");playaud1();};
+    }else if(foo.children[i].id=="drag4"){
+      silence.play();                
+      silence.onended = function() {i++;console.log("s1");playaud1();};
+    }else if(foo.children[i].id=="drag5"){
+      src.play();                
+      src.onended = function() {i++;console.log("src1");playaud1();};
+    }else if(foo.children[i].id=="drag6"){
+      src2.play();                
+      src2.onended = function() {i++;console.log("src2");playaud1();};
+    }
+  }else{
+    i=0;             
+  }            
+}
+
+var j =0;
+function playaud2(){
+  var foo2 = document.getElementById('track2');         
+  if(j<foo2.children.length){
+    if(foo2.children[j].id=="drag1"){
+      rains.play();                  
+      rains.onended = function() {j++;console.log("r2");playaud2();};                
+    }else if(foo2.children[j].id=="drag2"){
+      fires.play();                
+      fires.onended = function() {j++;console.log("f2");playaud2();};
+    }else if(foo2.children[j].id=="drag3"){
+      winds.play();                
+      winds.onended = function() {j++;console.log("w2");playaud2();};
+    }else if(foo2.children[j].id=="drag4"){
+      silence.play();                
+      silence.onended = function() {j++;console.log("s2");playaud2();};
+    }else if(foo2.children[j].id=="drag5"){
+      src.play();                
+      src.onended = function() {j++;console.log("src");playaud2();};
+    }else if(foo2.children[j].id=="drag6"){
+      src2.play();                
+      src2.onended = function() {j++;console.log("src2");playaud2();};
+    }
+  }else{
+    j=0;             
+  }            
+}
+var filesname;
+var filesname2;
+function handleFiles(e) {
+  var obUrl;
+    var file = e.currentTarget.files [0];
+    obUrl = URL.createObjectURL(file);
+    document.getElementById('src').setAttribute('src',obUrl);
+    console.log(filesname);
+    //var files = event.target.files;
+    filesname = e.target.files[0].name;
+    console.log(filesname);
+   // $("#src").attr("src", filesname);
+    var f_duration; //存儲時間
+  document.getElementById("src").addEventListener('canplaythrough',function(e){
+ //在輸入字段#f_du中添加持續時間
+ f_duration = Math.round(e.currentTarget.duration)*10;
+ //document.getElementById('f_du').value = f_duration;
+ console.log(f_duration);
+ $("#drag5").attr("width", f_duration);
+ URL.revokeObjectURL(obUrl);
+});  
+    
+    
+    
+    $("#drag5").attr("draggable", true);
+    //$("#src").attr("src", file.name);
+    window.setTimeout(function(){ set_audio_lenth() }, 1000);
+    //document.getElementById("audio").load();
+}
+
+function handleFiles2(e) {
+  var obUrl;
+    var file = e.currentTarget.files [0];
+    obUrl = URL.createObjectURL(file);
+    document.getElementById('src2').setAttribute('src',obUrl);
+    console.log(filesname2);
+    //var files = event.target.files;
+    filesname2 = e.target.files[0].name;
+    console.log(filesname2);
+   // $("#src").attr("src", filesname);
+    var f_duration; //存儲時間
+  document.getElementById("src2").addEventListener('canplaythrough',function(e){
+ //在輸入字段#f_du中添加持續時間
+ f_duration = Math.round(e.currentTarget.duration)*10;
+ //document.getElementById('f_du').value = f_duration;
+ console.log(f_duration);
+ $("#drag6").attr("width", f_duration);
+ URL.revokeObjectURL(obUrl);
+});  
+    
+    
+    
+    $("#drag6").attr("draggable", true);
+    //$("#src").attr("src", file.name);
+    window.setTimeout(function(){ set_audio_lenth2() }, 1000);
+    //document.getElementById("audio").load();
+}
+function set_audio_lenth(){
+  console.log(filesname);
+    $("#src").attr("src", "./"+filesname);
+    
+}
+function set_audio_lenth2(){
+  console.log(filesname2);
+    $("#src2").attr("src", "./"+filesname2);
+}
+//音檔分開
+window.addEventListener("drop",check_audio_full,false);
+window.addEventListener("load",get_audio_lenth,false);
+window.addEventListener("load",initGui,false);
+
+</script>
+
+</head>
+<body id="back" background="./image/ori.jpg">
+<div id="wh" >
+<p>音樂組合區:</p>
+<div><img src="./mu/rain.mp3" draggable="true" ondragstart="drag(event)" id="bar" width="78" height="40" ></div>
+<div class="div1" id="track1" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+<br>
+<br>
+<br>
+<div class="div1" id="track2" ondrop="drop(event)" ondragover="allowDrop(event)"></div>
+<br>
+<br>
+<br>
+<button id="play">播放</button>
+<button id="clear">清除</button>
+
+<br>
+<p>素材區:</p>
+<div class="s1">雨聲<br><img src="./image/rain.jpg" draggable="true" ondragstart="drag(event)" id="drag1" width="78" height="40"></div>
+<div class="s1" style="left:98px;">火聲<br><img src="./image/fire.jpg" draggable="true" ondragstart="drag(event)" id="drag2" width="200" height="40"></div>
+<div class="s1" style="left:319px;">風聲<br><img src="./image/wind.jpg" draggable="true" ondragstart="drag(event)" id="drag3" width="36" height="40"></div>
+<div class="s2" style="left:370px;">無聲<br><img src="./image/silence.jpg" draggable="true" ondragstart="drag(event)" id="drag4" width="10" height="40"></div><br><br><br><br>
+<div class="s2">自訂<br><img src="./image/self.jpg" draggable="false" ondragstart="drag(event)" id="drag5" width="78" height="40">
+<form action="upload.php" method="post" enctype="multipart/form-data">
+  Select audio to upload:
+  <br>
+  <input type="file" name="fileToUpload" id="fileToUpload">
+  <br>
+  <input type="submit" value="Upload Audio" name="submit" id="Upload">
+</form></div>
+
+<audio id="rains" src="./mu/rain.mp3"></audio>
+<audio id="fires" src="./mu/fire.mp3"></audio>
+<audio id="winds" src="./mu/wind.mp3"></audio>
+<audio id="silence" src="./mu/silence.mp3"></audio>
+<audio id="src" src=""></audio>
+<audio id="src2" src=""></audio>
+
+
+
+<div class="s2" style="left:200px;">自訂<br><img src="./image/self.jpg" draggable="false" ondragstart="drag(event)" id="drag6" width="78" height="40">
+<form action="upload.php" method="post" enctype="multipart/form-data">
+  Select audio to upload:
+  <br>
+  <input type="file" name="fileToUpload" id="fileToUpload2">
+  <br>
+  <input type="submit" value="Upload Audio" name="submit" id="Upload2">
+</form></div><br><br><br><br>
+
+</div>
+<script>
+  document.getElementById("fileToUpload").addEventListener("change", handleFiles, false);
+  document.getElementById("fileToUpload2").addEventListener("change", handleFiles2, false);
+  //document.getElementById("Upload").addEventListener("click", set_audio_lenth, false);
+  //document.getElementById("Upload2").addEventListener("submit", handleFiles2, false);
+</script>
+</body>
+</html>

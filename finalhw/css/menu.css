@@ -1,0 +1,69 @@
+
+
+    ul.drop-down-menu {
+        border: 0;
+	display: block;
+        font-family: 'Open Sans', Arial, sans-serif;
+        font-size: 13px;
+    }
+
+    ul.drop-down-menu li {
+        position: relative;
+        white-space: nowrap;
+        border-right: 0;
+    }
+
+    ul.drop-down-menu > li:last-child {
+        border-right: 0;
+    }
+
+    ul.drop-down-menu > li {
+        float: left; /* 只有第一層是靠左對齊*/
+    }
+
+     ul.drop-down-menu a {
+        background-color: none;
+        color: #fff;
+        display: block;
+        padding: 0 20px;
+        text-decoration: none;
+        line-height: 40px;
+
+    }
+    ul.drop-down-menu a:hover { /* 滑鼠滑入按鈕變色*/
+        background-color: #000000;
+        color: #fff;
+    }
+    ul.drop-down-menu li:hover > a { /* 滑鼠移入次選單上層按鈕保持變色*/
+        background-color: #000000;
+        color: #fff;
+    }
+ul.drop-down-menu ul {
+  	border: 0;
+        position: absolute;
+        z-index: 99;
+        left: -1px;
+        top: 100%;
+       min-width: 80px;
+    }
+
+    ul.drop-down-menu ul li {
+        border-bottom: 0;
+    }
+
+    ul.drop-down-menu ul li:last-child {
+        border-bottom: 0;
+    }
+
+    ul.drop-down-menu ul ul { /*第三層以後的選單出現位置與第二層不同*/
+        z-index: 999;
+        top: 10px;
+        left: 90%;
+    }
+ ul.drop-down-menu ul { /*隱藏次選單*/
+        display: none;
+    }
+
+    ul.drop-down-menu li:hover > ul { /* 滑鼠滑入展開次選單*/
+        display: block;
+    }

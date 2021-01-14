@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+	<title>期末專案</title>
+    <link href="./css/index.css" rel="stylesheet">
+	<link href="./css/menu.css" rel="stylesheet">
+	<style>
+		#iframe_block{     
+    		position: fixed;
+   			right:6px;
+    		bottom:3px;   
+    		border:none;   
+		}
+	</style>
+	<script src="build/three.js"></script>
+	<script src="build/three.min.js"></script>
+	<script type="text/javascript" src="./js/OrbitControls.js"></script>
+</head>
+<body>
+	<div id="starry-frame">
+			<ul class="drop-down-menu">
+				<li>
+					<img id="spaceship" src="./image/aa.png"  width="20%" height="20%" /><br>
+					<ul>
+						<li>
+							<a href="./city.html" title="城市">城市<span></span></a>
+						</li>
+						<li>
+							<a href="./moun.html" title="山林">山林</a>
+						</li>
+						<li>
+							<a href="./ocean.html" title="海岸">海岸</a>
+						</li>
+						<li>
+							<a href="./river.html" title="溪流">溪流</a>
+						</li>
+						<li>
+							<a href="./cust.html" title="自訂">自訂</a>
+						</li>
+					</ul>
+				</li>
+			</ul>
+		<div id="iframe_block">
+			<iframe src="./main.html" frameborder="0"></iframe>
+		</div>
+	</div>
+
+	</body>
+	<script>
+	    // 渲染
+	    var renderer = null;
+	    // 相機
+	    var camera = null;
+	    // 場景
+	    var scene = null;
+	    // 中心球
+        var centerBall = null;
+        var city = null
+        var moun = null;
+        var ocean = null;
+        var river = null;
+        var cust = null;
+	    // 包裹背景dom
+	    var dom = document.getElementById("starry-frame");
+        var orbitcontrols = null;
+        var textureLoader = new THREE.TextureLoader();
+        textureLoader.crossOrigin = true;
+
+	    /**
+	     * @param starLiteSize 球體的大小
+	     * @param starLiteRadius 球體的旋轉半徑
+	     * @param rotation 組合體的x,y,z三方向旋轉角度
+	     * @param speed 運動速度
+	     * @param scene 場景
+	     * @returns {{satellite: THREE.Mesh, speed: *}} 组合對象;速度
+	     */
+	    function initSatellite(xx,yy,starLiteSize, starLiteRadius, rotation, speed, imgUrl, scene) {
+	 
+	        var track = new THREE.Mesh(new THREE.RingGeometry(starLiteRadius, starLiteRadius + 0.05, 50, 1), new THREE.MeshBasicMaterial());
+			var centerMesh = new THREE.Mesh(new THREE.SphereGeometry(1, 1, 1), new THREE.MeshLambertMaterial()); //材質
+			
+            var starLite = new THREE.Mesh(new THREE.SphereGeometry(0.5, 30, 30), new THREE.MeshBasicMaterial({
+	        	map: THREE.ImageUtils.loadTexture(imgUrl)
+	        }));
+	        starLite.scale.x = starLite.scale.y = starLite.scale.z = starLiteSize;
+	        starLite.position.set(xx, yy, 0);
+	 
+	        var pivotPoint = new THREE.Object3D();
+	        pivotPoint.add(starLite.rotateX(THREE.Math.degToRad(90)));
+	        pivotPoint.add(track);
+	        centerMesh.add(pivotPoint);
+	        centerMesh.rotation.set(rotation.x, rotation.y, rotation.z);
+	        scene.add(centerMesh);
+	        return {starLite: centerMesh, speed: speed};
+	    };
+	 
+	    /**
+	     * 球體發光
+	     * @param color 颜色的r,g和b值;
+	     * @returns {Element} 返回canvas
+	     */
+		function generateSprite(color) {
+	        var canvas = document.createElement('canvas');
+	        canvas.width = 16;
+	        canvas.height = 16;
+	        var context = canvas.getContext('2d');
+	        var gradient = context.createRadialGradient(canvas.width / 2, canvas.height / 2, 0, canvas.width / 2, canvas.height / 2, canvas.width / 2);
+	        gradient.addColorStop(0, 'rgba(' + color + ',1)');
+	        gradient.addColorStop(0.2, 'rgba(' + color + ',1)');
+	        gradient.addColorStop(0.4, 'rgba(' + color + ',.6)');
+	        gradient.addColorStop(1, 'rgba(0,0,0,0)');
+	        context.fillStyle = gradient;
+	        context.fillRect(0, 0, canvas.width, canvas.height);
+	        return canvas;
+	    };
+	    // 執行函數
+	    function render() {
+	        renderer.render(scene, camera);
+			centerBall.rotation.y -= 0.01;
+			city.starLite.rotation.z -= city.speed;
+			moun.starLite.rotation.z -= moun.speed;
+			ocean.starLite.rotation.z -= ocean.speed;
+			river.starLite.rotation.z -= river.speed;
+
+	    	orbitcontrols.update();
+	        requestAnimationFrame(render);
+	    }
+	    // 初始化函數
+	    function initThree() {
+	        // 初始化場景
+	        scene = new THREE.Scene();
+	        // 初始化相機
+	        camera = new THREE.PerspectiveCamera(20, dom.clientWidth / dom.clientHeight, 1, 1000);
+	        // 相機位置
+	        camera.position.set(0, 0, 500);
+	        renderer = new THREE.WebGLRenderer({
+	            alpha: true,
+	            antialias: true
+	        });
+	        // 窗口尺寸
+	        renderer.setSize(dom.clientWidth, dom.clientHeight);
+	        // 初始化控制器
+	        orbitcontrols = new THREE.OrbitControls(camera,renderer.domElement);
+	        dom.appendChild(renderer.domElement);
+	        // 太陽材質
+	        var sunTexture = THREE.ImageUtils.loadTexture('./image/sun_bg.jpg', {}, function () {
+	            renderer.render(scene, camera);
+	        });
+	        // 太陽設定
+	        centerBall = new THREE.Mesh(new THREE.SphereGeometry(25, 30, 30), new THREE.MeshBasicMaterial({
+	            map: sunTexture
+			}));
+	        // 添加發光效果
+	        var centerBallLite = new THREE.Sprite(new THREE.SpriteMaterial({
+	            map: new THREE.CanvasTexture(generateSprite('253,111,7')),
+	            blending: THREE.AdditiveBlending
+	        }));
+	        centerBallLite.scale.x = centerBallLite.scale.y = centerBallLite.scale.z = 90;
+	        scene.add(centerBallLite);
+            scene.add(centerBall);
+	        //城市
+			city = initSatellite(70,0,40, 70, {x: -Math.PI * 0.42, y: Math.PI * 0.02, z: 0}, 0.01, './image/city2.jpg', scene);
+	        //山林
+	        moun = initSatellite(-70,0,40, 70, {x: -Math.PI * 0.42, y: Math.PI * 0.02, z: 0}, 0.01, './image/fore.jpg', scene);
+	        //海岸
+	        ocean = initSatellite(0,70,40, 70, {x: -Math.PI * 0.42, y: Math.PI * 0.02, z: 0}, 0.01, './image/kris-guico-rsB-he-ye7w-unsplash.jpg', scene);
+	        //溪流
+	        river = initSatellite(0,-70,40, 70, {x: -Math.PI * 0.42, y: Math.PI * 0.02, z: 0}, 0.01, './image/river.jpg', scene);
+			render();
+			//var spaceship = document.getElementById("spaceship");
+            //spaceship.addEventListener("click", main, false);
+		}
+
+		/*function main(){
+			window.location.href="./main.html";
+		}*/
+		window.addEventListener("load", initThree, false);
+
+	    window.onresize = function () {
+	    	// 重新初始化尺寸
+	        camera.aspect = dom.clientWidth / dom.clientHeight
+	        camera.updateProjectionMatrix()
+	        renderer.setSize(dom.clientWidth, dom.clientHeight)
+	    }
+	</script>
+</html>
